@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luxury Homes</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background: linear-gradient(135deg, #fdfbff, #eef2ff);
+  color: #333;
+}
+
+/* Container */
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 24px;
+}
+
+/* Title */
+h1 {
+  text-align: center;
+  font-weight: 700;
+  color: #4c4c6d;
+}
+
+/* Screens */
+.screen {
+  display: none;
+}
+.active {
+  display: block;
+}
+
+/* Card */
+.card {
+  background: #ffffffcc;
+  backdrop-filter: blur(10px);
+  padding: 28px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(100, 100, 150, 0.1);
+  margin-top: 20px;
+}
+
+/* Select */
+select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  background: #f9f9ff;
+  font-size: 15px;
+}
+
+/* Button */
+button {
+  margin-top: 15px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+
+  background: linear-gradient(135deg, #a5b4fc, #c7d2fe);
+  color: #222;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+}
+
+/* Question */
+#question {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+/* Slider */
+input[type="range"] {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* Result */
+.result {
+  margin-top: 16px;
+  background: #f0f4ff;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+/* Score */
+.final {
+  font-size: 24px;
+  text-align: center;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+/* Progress */
+#progress {
+  font-size: 14px;
+  color: #888;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🏡 Luxury Homes</h1>
+
+<!-- City Screen -->
+<div id="cityScreen" class="screen active">
+  <div class="card">
+    <h2>Select a City</h2>
+
+    <select id="citySelect">
+      <option value="">Choose city</option>
+      <option value="Bangalore">Bangalore</option>
+      <option value="Gurugram">Gurugram</option>
+      <option value="Ahmedabad">Ahmedabad</option>
+      <option value="Mumbai">Mumbai</option>
+    </select>
+
+    <button onclick="startGame()">Start Game</button>
+  </div>
+</div>
+
+<!-- Game Screen -->
+<div id="gameScreen" class="screen">
+  <div class="card">
+
+    <div id="progress"></div>
+    <h2 id="question"></h2>
+
+    <label>Estimate price (₹ Crore)</label>
+
+    <input id="slider" type="range" min="1" max="150" value="10">
+    <div style="margin-top:6px;">
+      Your Guess: <b>₹ <span id="guessValue">10</span> Cr</b>
+    </div>
+
+    <button onclick="submitGuess()">Submit Guess</button>
+
+    <div class="result" id="result"></div>
+
+  </div>
+</div>
+
+<!-- End Screen -->
+<div id="endScreen" class="screen">
+  <div class="card">
+    <h2>🎉 Game Complete</h2>
+    <div class="final" id="finalScore"></div>
+    <button onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const data = {
+  "Bangalore": [
+    { name: "Emaar The Palm Drive", min: 6, max: 18 },
+    { name: "Prestige Leela Residences", min: 18, max: 50 },
+    { name: "Phoenix Kessaku", min: 8, max: 25 },
+    { name: "Embassy Lake Terraces", min: 7, max: 30 },
+    { name: "Windmills of Your Mind", min: 5, max: 20 }
+  ],
+  "Gurugram": [
+    { name: "DLF The Camellias", min: 40, max: 150 },
+    { name: "Emaar DigiHomes", min: 4, max: 12 },
+    { name: "Emaar Marbella", min: 10, max: 30 },
+    { name: "Trump Towers", min: 10, max: 35 },
+    { name: "DLF Magnolias", min: 25, max: 80 }
+  ],
+  "Ahmedabad": [
+    { name: "The Banyan", min: 18, max: 25 },
+    { name: "Riviera Elite", min: 7, max: 12 },
+    { name: "Shivalik Paradise", min: 5, max: 10 },
+    { name: "Iscon Platinum", min: 4, max: 9 },
+    { name: "Madhav Oeuvre 2", min: 4, max: 8 }
+  ],
+  "Mumbai": [
+    { name: "Three Sixty West", min: 40, max: 150 },
+    { name: "Lodha Malabar", min: 50, max: 150 },
+    { name: "Raheja Artesia", min: 35, max: 100 },
+    { name: "Omkar 1973", min: 25, max: 80 },
+    { name: "The Imperial", min: 20, max: 70 }
+  ]
+};
+
+let city, questions, current = 0, score = 0;
+
+const slider = document.getElementById("slider");
+const guessValue = document.getElementById("guessValue");
+
+slider.oninput = () => {
+  guessValue.textContent = slider.value;
+};
+
+function startGame() {
+  city = document.getElementById("citySelect").value;
+
+  if (!city) {
+    alert("Select a city first");
+    return;
+  }
+
+  questions = data[city];
+  current = 0;
+  score = 0;
+
+  switchScreen("cityScreen", "gameScreen");
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = questions[current];
+
+  document.getElementById("question").textContent = q.name;
+  document.getElementById("progress").textContent =
+    `Question ${current + 1} / ${questions.length}`;
+
+  document.getElementById("result").textContent = "";
+}
+
+function submitGuess() {
+  const q = questions[current];
+  const guess = Number(slider.value);
+
+  const actual = (q.min + q.max) / 2;
+
+  const diff = Math.abs(actual - guess);
+  const points = Math.max(0, 100 - diff * 3);
+
+  score += Math.round(points);
+
+  document.getElementById("result").innerHTML =
+    `Actual: ₹${q.min}–${q.max} Cr <br> You scored <b>${Math.round(points)}</b>`;
+
+  current++;
+
+  setTimeout(() => {
+    if (current < questions.length) {
+      loadQuestion();
+    } else {
+      endGame();
+    }
+  }, 1300);
+}
+
+function endGame() {
+  switchScreen("gameScreen", "endScreen");
+
+  document.getElementById("finalScore").textContent =
+    `Your Score: ${score}`;
+}
+
+function switchScreen(hide, show) {
+  document.getElementById(hide).classList.remove("active");
+  document.getElementById(show).classList.add("active");
+}
+</script>
+
+</body>
+</html>

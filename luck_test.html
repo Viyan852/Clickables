@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luck Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            background: hsl(210, 20%, 98%);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            font-size: 0.875rem;
+            color: hsl(210, 10%, 45%);
+            text-decoration: none;
+            z-index: 100;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: hsl(210, 10%, 25%);
+        }
+
+        .title {
+            position: fixed;
+            top: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            font-weight: 300;
+            color: hsl(210, 10%, 30%);
+            z-index: 50;
+        }
+
+        .canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+        }
+
+        .mark {
+            position: absolute;
+            border-radius: 4px;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+        }
+
+        .mark.common {
+            width: 24px;
+            height: 24px;
+            background: hsl(200, 45%, 55%);
+        }
+
+        .mark.uncommon {
+            width: 32px;
+            height: 32px;
+            background: hsl(160, 50%, 52%);
+            transform: rotate(45deg);
+        }
+
+        .mark.rare {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, hsl(280, 60%, 55%), hsl(320, 65%, 60%));
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .prompt {
+            position: fixed;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.1rem;
+            color: hsl(210, 10%, 40%);
+            font-weight: 300;
+            opacity: 0.7;
+            z-index: 20;
+        }
+
+        .reset {
+            position: fixed;
+            top: 4rem;
+            right: 1.5rem;
+            background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            color: hsl(210, 10%, 40%);
+            cursor: pointer;
+            opacity: 0.4;
+            transition: all 0.3s ease;
+            font-weight: 400;
+            backdrop-filter: blur(10px);
+        }
+
+        .reset:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.95);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.6rem;
+            }
+            
+            .prompt {
+                bottom: 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back</a>
+    <div class="title">Luck Test</div>
+    <div class="reset" id="resetBtn">Clear</div>
+    <div class="prompt">Click or press spacebar</div>
+    
+    <canvas class="canvas" id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        let marks = [];
+        let animationId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function getRandomOutcome() {
+            const rand = Math.random();
+            if (rand < 0.70) return { type: 'common', prob: 0.70 };
+            if (rand < 0.95) return { type: 'uncommon', prob: 0.25 };
+            return { type: 'rare', prob: 0.05 };
+        }
+
+        function createMark() {
+            const outcome = getRandomOutcome();
+            const rect = canvas.getBoundingClientRect();
+            
+            const x = 100 + Math.random() * (canvas.width - 300);
+            const y = 120 + Math.random() * (canvas.height - 300);
+            
+            const mark = document.createElement('div');
+            mark.className = `mark ${outcome.type}`;
+            mark.style.left = x + 'px';
+            mark.style.top = y + 'px';
+            mark.style.opacity = '0';
+            
+            document.body.appendChild(mark);
+            marks.push({ element: mark, type: outcome.type });
+            
+            // Animate in
+            requestAnimationFrame(() => {
+                mark.style.opacity = '1';
+                mark.style.transform = 'scale(1) translateY(0)';
+            });
+        }
+
+        function animate() {
+            marks.forEach((mark, index) => {
+                if (Math.random() < 0.02) {
+                    const wobble = (Math.random() - 0.5) * 2;
+                    mark.element.style.transform = `translate(${wobble}px, ${wobble * 0.5}px)`;
+                }
+            });
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function clearMarks() {
+            marks.forEach(mark => mark.element.remove());
+            marks = [];
+        }
+
+        // Event listeners
+        window.addEventListener('resize', resizeCanvas);
+        document.addEventListener('click', createMark);
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                createMark();
+            }
+        });
+        
+        resetBtn.addEventListener('click', clearMarks);
+
+        // Prevent context menu
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Initialize
+        resizeCanvas();
+        animate();
+    </script>
+</body>

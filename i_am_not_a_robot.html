@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>I Am Not a Robot</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #f9fafb;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    color: #111827;
+
+    /* ✅ Prevent text selection */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+.back-link {
+    position: fixed;
+    top: 32px;
+    left: 32px;
+    font-size: 15px;
+    color: #6b7280;
+    text-decoration: none;
+    font-weight: 500;
+    z-index: 1000;
+    transition: color 0.2s ease;
+}
+
+.back-link:hover {
+    color: #374151;
+}
+
+.container {
+    max-width: 440px;
+    width: 100%;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 64px 48px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: box-shadow 0.4s ease;
+}
+
+.card.activated {
+    box-shadow: 0 35px 70px -12px rgba(0,0,0,0.15);
+}
+
+.title {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.steps-container {
+    position: relative;
+    margin-top: 48px;
+    min-height: 260px;
+}
+
+.step {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+.step.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.instruction {
+    font-size: 22px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 40px;
+}
+
+.checkbox-container {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 24px;
+}
+
+.checkbox-custom {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    margin-right: 18px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.checkbox-custom.checked {
+    background: #6366f1;
+    border-color: #6366f1;
+}
+
+.checkbox-custom.checked::after {
+    content: "✓";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-weight: 700;
+}
+
+.checkbox-label {
+    font-size: 20px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.choices {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.choice {
+    padding: 24px 28px;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    font-size: 18px;
+}
+
+.choice:hover {
+    border-color: #a5b4fc;
+    background: #f8fafc;
+}
+
+.choice.selected {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+}
+
+.shapes-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.shape {
+    aspect-ratio: 1;
+    border-radius: 16px;
+    border: 3px solid #e5e7eb;
+    display: grid;
+    place-items: center;
+    font-size: 32px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.shape.selected {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+}
+
+.completion {
+    font-size: 26px;
+    font-weight: 600;
+    color: #059669;
+}
+
+.completion-subtitle {
+    margin-top: 8px;
+    color: #6b7280;
+}
+</style>
+</head>
+
+<body>
+
+<a href="../index.html" class="back-link">← Back</a>
+
+<div class="container">
+    <div class="card" id="card">
+        <div class="title">I Am Not a Robot</div>
+
+        <div class="steps-container">
+            <div class="step active" id="step-0">
+                <div class="checkbox-container" id="checkbox-btn">
+                    <div class="checkbox-custom" id="checkbox"></div>
+                    <span class="checkbox-label">I am not a robot</span>
+                </div>
+            </div>
+
+            <div class="step" id="step-1">
+                <div class="instruction">Select what moves without being seen.</div>
+                <div class="choices">
+                    <div class="choice" data-step="1">Wind</div>
+                    <div class="choice" data-step="1">Time</div>
+                    <div class="choice" data-step="1">Thought</div>
+                </div>
+            </div>
+
+            <div class="step" id="step-2">
+                <div class="instruction">Choose forms that belong together.</div>
+                <div class="shapes-container">
+                    <div class="shape" data-id="0">△</div>
+                    <div class="shape" data-id="1">○</div>
+                    <div class="shape" data-id="2">▢</div>
+                    <div class="shape" data-id="3">◇</div>
+                    <div class="shape" data-id="4">◐</div>
+                    <div class="shape" data-id="5">▷</div>
+                </div>
+            </div>
+
+            <div class="step" id="step-3">
+                <div class="instruction">What continues when the pattern breaks?</div>
+                <div class="choices">
+                    <div class="choice" data-step="3">Silence</div>
+                    <div class="choice" data-step="3">The observer</div>
+                    <div class="choice" data-step="3">Change</div>
+                    <div class="choice" data-step="3">Presence</div>
+                </div>
+            </div>
+
+            <div class="step" id="step-4">
+                <div class="completion">Complete</div>
+                <div class="completion-subtitle">Observation confirmed</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class Verification {
+    constructor() {
+        this.step = 0;
+        this.selected = new Set();
+        this.locked = false;
+        this.init();
+    }
+
+    init() {
+        document.getElementById("checkbox-btn").onclick = () => this.start();
+        document.addEventListener("click", e => this.handle(e));
+    }
+
+    deactivateAll() {
+        document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+    }
+
+    show(n) {
+        this.deactivateAll();
+        document.getElementById(`step-${n}`).classList.add("active");
+        this.step = n;
+        this.locked = false;
+    }
+
+    start() {
+        if (this.locked) return;
+        this.locked = true;
+        document.getElementById("checkbox").classList.add("checked");
+        document.getElementById("card").classList.add("activated");
+        setTimeout(() => this.show(1), 450);
+    }
+
+    handle(e) {
+        const el = e.target.closest(".choice,.shape");
+        if (!el || this.locked) return;
+
+        this.locked = true;
+
+        if (el.classList.contains("shape")) {
+            el.classList.toggle("selected");
+            this.selected.add(el.dataset.id);
+            if (this.selected.size === 3) {
+                setTimeout(() => this.show(3), 600);
+            } else {
+                this.locked = false;
+            }
+        } else {
+            el.classList.add("selected");
+            setTimeout(() => this.show(this.step + 1), 500);
+        }
+    }
+}
+
+new Verification();
+</script>
+
+</body>
+</html>

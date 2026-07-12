@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Speed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease-out;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            cursor: pointer;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            z-index: 100;
+            transition: color 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .back-link:hover {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            text-align: center;
+        }
+
+        .mode-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 300px;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .mode-button {
+            padding: 1.5rem 2rem;
+            font-size: 1.3rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 0.75rem;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .mode-button:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-3px);
+        }
+
+        .mode-button.active {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.8);
+        }
+
+        .screen {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 300;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease-out;
+        }
+
+        .waiting .screen-text { opacity: 0.6; }
+        .reacting .screen-text { font-size: 4rem; font-weight: 600; }
+        .result .screen-text { font-size: 3.5rem; font-weight: 400; }
+        .result .context-text { 
+            font-size: 1.2rem; 
+            margin-top: 1rem; 
+            opacity: 0.7;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 2.2rem; margin-bottom: 2rem; }
+            .screen { font-size: 2rem; }
+            .reacting .screen-text { font-size: 3rem; }
+            .result .screen-text { font-size: 2.8rem; }
+            .mode-button { font-size: 1.1rem; padding: 1.2rem 1.5rem; }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="waiting">
+    <a href="../index.html" class="back-link">← Back</a>
+    
+    <div class="title">Human Speed</div>
+    
+    <div id="modeSelector" class="mode-selector">
+        <div class="mode-button" data-mode="0">Formation</div>
+        <div class="mode-button" data-mode="1">Race</div>
+        <div class="mode-button" data-mode="2">Push</div>
+        <div class="mode-button" data-mode="3">Overtake</div>
+        <div class="mode-button" data-mode="4">Qualifying</div>
+    </div>
+    
+    <div id="mainScreen" class="screen hidden">
+        <div class="screen-text" id="screenText">Wait.</div>
+        <div class="context-text hidden" id="contextText"></div>
+    </div>
+
+    <script>
+        const modes = [
+            { name: 'Formation', waitMin: 1500, waitMax: 3500, waitHue: 200, reactHue: 160, baseColor: 'hsl(200, 30%, 95%)' },
+            { name: 'Race', waitMin: 1200, waitMax: 3000, waitHue: 220, reactHue: 180, baseColor: 'hsl(220, 25%, 94%)' },
+            { name: 'Push', waitMin: 1000, waitMax: 2800, waitHue: 240, reactHue: 200, baseColor: 'hsl(240, 28%, 93%)' },
+            { name: 'Overtake', waitMin: 800, waitMax: 2500, waitHue: 260, reactHue: 220, baseColor: 'hsl(260, 26%, 92%)' },
+            { name: 'Qualifying', waitMin: 500, waitMax: 2200, waitHue: 280, reactHue: 240, baseColor: 'hsl(280, 32%, 91%)' }
+        ];
+
+        let currentMode = 0;
+        let state = 'selecting'; // selecting, waiting, reacting, result
+        let reactionStartTime = 0;
+        let timeoutId = null;
+
+        const modeSelector = document.getElementById('modeSelector');
+        const mainScreen = document.getElementById('mainScreen');
+        const screenText = document.getElementById('screenText');
+        const contextText = document.getElementById('contextText');
+        const body = document.body;
+
+        function setMode(index) {
+            currentMode = index;
+            document.querySelectorAll('.mode-button').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            body.style.backgroundColor = modes[index].baseColor;
+            startRound();
+        }
+
+        function startRound() {
+            state = 'waiting';
+            body.className = 'waiting';
+            mainScreen.classList.remove('hidden');
+            modeSelector.classList.add('hidden');
+            screenText.textContent = 'Wait.';
+            contextText.classList.add('hidden');
+            
+            const mode = modes[currentMode];
+            const waitTime = mode.waitMin + Math.random() * (mode.waitMax - mode.waitMin);
+            
+            timeoutId = setTimeout(() => {
+                startReaction();
+            }, waitTime);
+        }
+
+        function startReaction() {
+            if (state !== 'waiting') return;
+            
+            state = 'reacting';
+            body.className = 'reacting';
+            const mode = modes[currentMode];
+            const reactColor = `hsl(${mode.reactHue}, 40%, 15%)`;
+            body.style.backgroundColor = reactColor;
+            screenText.textContent = 'Now.';
+        }
+
+        function handleReaction() {
+            if (state === 'selecting') return;
+            
+            if (state === 'waiting') {
+                // Too early - reset quietly
+                clearTimeout(timeoutId);
+                setTimeout(startRound, 500);
+                return;
+            }
+            
+            if (state === 'reacting') {
+                const reactionTime = Date.now() - reactionStartTime;
+                showResult(reactionTime);
+            }
+        }
+
+        function showResult(reactionTime) {
+            state = 'result';
+            body.className = 'result';
+            
+            screenText.textContent = `${reactionTime}ms`;
+            
+            let context = '';
+            if (reactionTime < 200) {
+                context = 'Within a common human range.';
+            } else if (reactionTime < 300) {
+                context = 'Faster than many daily reactions.';
+            } else {
+                context = 'Typical for focused attention.';
+            }
+            
+            contextText.textContent = context;
+            contextText.classList.remove('hidden');
+            
+            const mode = modes[currentMode];
+            body.style.backgroundColor = `hsl(${mode.waitHue}, 20%, 92%)`;
+            
+            // Auto next round after 3 seconds
+            setTimeout(() => {
+                modeSelector.classList.remove('hidden');
+                mainScreen.classList.add('hidden');
+                state = 'selecting';
+            }, 3000);
+        }
+
+        // Event listeners
+        document.addEventListener('click', handleReaction);
+        document.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleReaction();
+        }, { passive: false });
+
+        document.querySelectorAll('.mode-button').forEach((btn, index) => {
+            btn.addEventListener('click', () => setMode(index));
+        });
+
+        // Initial state
+        body.style.backgroundColor = modes[0].baseColor;
+    </script>
+</body>
+</html>

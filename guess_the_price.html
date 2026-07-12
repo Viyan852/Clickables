@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Price</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #fafbfc;
+            color: #1f2937;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 14px;
+            color: #6b7280;
+            text-decoration: none;
+            z-index: 1000;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .back-link:hover {
+            opacity: 1;
+        }
+
+        .item-name {
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 60px;
+            color: #111827;
+            line-height: 1.1;
+        }
+
+        .input-section {
+            margin-bottom: 40px;
+        }
+
+        .price-input {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 600;
+            width: 280px;
+            max-width: 100%;
+            padding: 20px 24px;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            text-align: center;
+            background: white;
+            color: #111827;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .price-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .submit-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .submit-btn:hover {
+            background: #2563eb;
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .reveal.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .price-display {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            margin: 20px 0;
+            line-height: 1;
+        }
+
+        .guess-display {
+            font-size: 1.4rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .comparison {
+            font-size: 1.2rem;
+            color: #374151;
+            font-style: italic;
+            margin: 24px 0;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .next-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            margin-top: 20px;
+        }
+
+        .next-btn:hover {
+            background: #059669;
+        }
+
+        .final-screen {
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .final-screen.show {
+            opacity: 1;
+        }
+
+        .final-text {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: #6b7280;
+            font-weight: 300;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 20px;
+            }
+            
+            .item-name {
+                margin-bottom: 40px;
+            }
+            
+            .price-input {
+                width: 100%;
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back</a>
+    
+    <div class="container" id="container">
+        <div class="item-section" id="itemSection">
+            <h1 class="item-name" id="itemName"></h1>
+            <div class="input-section">
+                <input type="text" class="price-input" id="priceInput" placeholder="₹ 1,00,000" inputmode="numeric">
+                <br><br>
+                <button class="submit-btn" id="submitBtn">Guess</button>
+            </div>
+        </div>
+        
+        <div class="reveal" id="revealSection">
+            <div class="guess-display" id="guessDisplay"></div>
+            <div class="price-display" id="realPrice"></div>
+            <div class="comparison" id="comparison"></div>
+            <button class="next-btn" id="nextBtn">Next</button>
+        </div>
+        
+        <div class="final-screen" id="finalScreen">
+            <div class="final-text">
+                Numbers stretch beyond what we carry in our pockets.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const items = [
+            {
+                name: "A cup of coffee at an airport",
+                price: 350,
+                comparison: "Roughly the cost of this small luxury."
+            },
+            {
+                name: "A month of cloud storage for a large company",
+                price: 4000000,
+                comparison: "More than most people earn in a year."
+            },
+            {
+                name: "Electricity used by one data center per day",
+                price: 2000000,
+                comparison: "Powers the invisible infrastructure of the internet."
+            },
+            {
+                name: "A professional football stadium seat",
+                price: 75000,
+                comparison: "One view for a lifetime of matches."
+            },
+            {
+                name: "Producing one smartphone",
+                price: 15000,
+                comparison: "The factory cost behind pocket technology."
+            },
+            {
+                name: "Launching a small satellite into orbit",
+                price: 40000000,
+                comparison: "A ticket to watch Earth from space."
+            },
+            {
+                name: "A single Super Bowl advertisement",
+                price: 55000000,
+                comparison: "30 seconds seen by 100 million people."
+            },
+            {
+                name: "Building one kilometer of metro tunnel",
+                price: 300000000,
+                comparison: "Underground arteries of a city."
+            },
+            {
+                name: "Maintaining a commercial website for one year",
+                price: 250000,
+                comparison: "The quiet cost of being online."
+            },
+            {
+                name: "Hosting a global sports event opening ceremony",
+                price: 500000000,
+                comparison: "A spectacle uniting billions for one night."
+            }
+        ];
+
+        let currentItem = 0;
+        let userGuess = '';
+
+        const elements = {
+            itemName: document.getElementById('itemName'),
+            priceInput: document.getElementById('priceInput'),
+            submitBtn: document.getElementById('submitBtn'),
+            itemSection: document.getElementById('itemSection'),
+            revealSection: document.getElementById('revealSection'),
+            guessDisplay: document.getElementById('guessDisplay'),
+            realPrice: document.getElementById('realPrice'),
+            comparison: document.getElementById('comparison'),
+            nextBtn: document.getElementById('nextBtn'),
+            finalScreen: document.getElementById('finalScreen'),
+            container: document.getElementById('container')
+        };
+
+        function formatPrice(num) {
+            if (num >= 10000000) {
+                return `₹${(num / 10000000).toFixed(1)} Cr`;
+            } else if (num >= 100000) {
+                return `₹${(num / 100000).toFixed(0)} L`;
+            } else if (num >= 1000) {
+                return `₹${(num / 1000).toFixed(0)}K`;
+            }
+            return `₹${num.toLocaleString()}`;
+        }
+
+        function formatRawPrice(num) {
+            return num.toLocaleString();
+        }
+
+        function loadItem(index) {
+            const item = items[index];
+            elements.itemName.textContent = item.name;
+            elements.priceInput.value = '';
+            elements.priceInput.focus();
+            userGuess = '';
+        }
+
+        function showReveal() {
+            const item = items[currentItem];
+            
+            elements.guessDisplay.textContent = `Your guess: ${userGuess ? formatPrice(parseInt(userGuess)) : 'No guess'}`;
+            elements.realPrice.textContent = formatPrice(item.price);
+            elements.comparison.textContent = item.comparison;
+            
+            elements.itemSection.style.display = 'none';
+            elements.revealSection.classList.add('show');
+        }
+
+        function nextItem() {
+            currentItem++;
+            if (currentItem < items.length) {
+                elements.revealSection.classList.remove('show');
+                elements.itemSection.style.display = 'block';
+                loadItem(currentItem);
+            } else {
+                elements.revealSection.style.display = 'none';
+                elements.finalScreen.classList.add('show');
+            }
+        }
+
+        // Event listeners
+        elements.submitBtn.addEventListener('click', () => {
+            userGuess = elements.priceInput.value.replace(/[^\d]/g, '');
+            if (userGuess) {
+                showReveal();
+            }
+        });
+
+        elements.priceInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                userGuess = elements.priceInput.value.replace(/[^\d]/g, '');
+                if (userGuess) {
+                    showReveal();
+                }
+            }
+        });
+
+        elements.nextBtn.addEventListener('click', nextItem);
+
+        // Input handling
+        elements.priceInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/[^\d]/g, '');
+            if (value) {
+                // Auto-format as user types
+                e.target.value = formatRawPrice(parseInt(value));
+            }
+        });
+
+        // Initial load
+        loadItem(0);
+
+        // Allow Enter on submit button
+        elements.submitBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

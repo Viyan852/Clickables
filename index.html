@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clickables</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: linear-gradient(135deg, #f0f9ff, #ffffff);
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  padding: 50px 20px 20px;
+}
+
+header h1 {
+  font-size: 34px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #0ea5e9, #22c55e);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* GRID */
+.grid {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 25px;
+}
+
+/* TILE */
+.tile {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+.tile:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 20px 45px rgba(0,0,0,0.15);
+}
+
+.tile img {
+  width: 100%;
+  display: block;
+}
+
+/* TITLE OVERLAY */
+.tile::after {
+  content: attr(data-title);
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 30px;
+  font-size: 14px;
+  color: #333;
+  background: #e5e7eb;
+}
+
+footer a {
+  text-decoration: none;
+  color: #333;
+  margin: 0 10px;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>⭐ Clickables</h1>
+</header>
+
+<div class="grid">
+
+  <!-- FEATURED -->
+  <a class="tile" href="games/the_cricket.html" data-title="The Cricket">
+    <img src="assets/tiles/the_cricket.png" alt="The Cricket">
+  </a>
+
+  <a class="tile" href="games/civilisation_builder.html" data-title="Civilisation Builder">
+    <img src="assets/tiles/civilisation_builder.png" alt="Civilisation Builder">
+  </a>
+
+  <!-- ALL GAMES -->
+  <a class="tile" href="games/are_you_a_scientist.html" data-title="Scientist">
+    <img src="assets/tiles/are_you_a_scientist.png">
+  </a>
+
+  <a class="tile" href="games/at_depth.html" data-title="At Depth">
+    <img src="assets/tiles/at_depth.png">
+  </a>
+
+  <a class="tile" href="games/do_nothing.html" data-title="Do Nothing">
+    <img src="assets/tiles/do_nothing.png">
+  </a>
+
+  <a class="tile" href="games/guess_the_price.html" data-title="Guess Price">
+    <img src="assets/tiles/guess_the_price.png">
+  </a>
+
+  <a class="tile" href="games/how_big_is_it.html" data-title="How Big?">
+    <img src="assets/tiles/how_big_is_it.png">
+  </a>
+
+  <a class="tile" href="games/how_old_is_the_internet.html" data-title="Internet Age">
+    <img src="assets/tiles/how_old_is_the_internet.png">
+  </a>
+
+  <a class="tile" href="games/how_rare_are_you.html" data-title="How Rare">
+    <img src="assets/tiles/how_rare_are_you.png">
+  </a>
+
+  <a class="tile" href="games/human_speed.html" data-title="Human Speed">
+    <img src="assets/tiles/human_speed.png">
+  </a>
+
+  <a class="tile" href="games/i_am_not_a_robot.html" data-title="Not Robot">
+    <img src="assets/tiles/i_am_not_a_robot.png">
+  </a>
+
+  <a class="tile" href="games/luck_test.html" data-title="Luck Test">
+    <img src="assets/tiles/luck_test.png">
+  </a>
+
+  <a class="tile" href="games/luxury_homes.html" data-title="Luxury Homes">
+    <img src="assets/tiles/luxury_homes.png">
+  </a>
+
+  <a class="tile" href="games/make_a_desecion.html" data-title="Decision">
+    <img src="assets/tiles/one_decision.png">
+  </a>
+
+  <a class="tile" href="games/my_eye.html" data-title="My Eye">
+    <img src="assets/tiles/my_eye.png">
+  </a>
+
+</div>
+
+<footer>
+  <a href="about.html">About</a> •
+  <a href="buy-coffee.html">Buy me a coffee</a>
+</footer>
+
+</body>
+</html>

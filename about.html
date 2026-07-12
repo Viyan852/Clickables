@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>About</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #ffffff;
+    color: #111;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 32px;
+    overflow: hidden; /* allows confetti to float without scrollbar */
+}
+
+.container {
+    max-width: 600px;
+    position: relative;
+    z-index: 10;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 16px;
+    font-size: 32px;
+}
+
+p {
+    color: #444;
+    line-height: 1.7;
+    font-size: 18px;
+}
+
+/* Back link */
+.back {
+    display: inline-block;
+    margin-top: 32px;
+    text-decoration: none;
+    color: #111;
+    font-size: 15px;
+}
+.back:hover {
+    text-decoration: underline;
+}
+
+/* ==========================
+   CSS CONFETTI DECORATION
+   ========================== */
+
+.confetti {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--color);
+    top: -20px;
+    left: var(--x);
+    opacity: 0.9;
+    border-radius: 2px;
+    animation: fall var(--duration) linear infinite;
+}
+
+/* Falling animation */
+@keyframes fall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+    100% {
+        transform: translateY(120vh) rotate(360deg);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Confetti generator (20 pieces) -->
+<script>
+for (let i = 0; i < 20; i++) {
+    const c = document.createElement("div");
+    c.className = "confetti";
+
+    /* Random colors */
+    const colors = ["#ffadad", "#ffd6a5", "#caffbf", "#9bf6ff", "#bdb2ff", "#ffc6ff"];
+    c.style.setProperty("--color", colors[Math.floor(Math.random() * colors.length)]);
+
+    /* Random horizontal starting position */
+    c.style.setProperty("--x", Math.random() * 100 + "vw");
+
+    /* Random falling time */
+    c.style.setProperty("--duration", 4 + Math.random() * 4 + "s");
+
+    document.body.appendChild(c);
+}
+</script>
+
+<div class="container">
+    <h1>About Me</h1>
+
+    <p>
+        I am Viyan Solanki making absurd and funny things on the web.<br>
+        I was inspired to create this project by <strong>neal.fun</strong>.<br><br>
+        Please keep supporting me!<br>
+        For any queries, contact:<br>
+        <strong>viyannsolanki@outlook.com</strong>
+    </p>
+
+    ← Back</a>
+</div>
+
+</body>
+</html>

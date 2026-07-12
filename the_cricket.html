@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Cricket - Professional Cricket Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .game-header {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 100%);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00d4ff;
+            text-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .scoreboard {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .score-item {
+            text-align: center;
+            background: rgba(0, 212, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #00d4ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Main Game Area */
+        .game-main {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            flex: 1;
+            background: radial-gradient(circle at 50% 30%, rgba(0, 212, 255, 0.1), transparent);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.15), inset 0 0 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            width: 280px;
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.08), rgba(0, 212, 255, 0.02));
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            color: #00d4ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .panel-content {
+            font-size: 14px;
+            color: #e0e0e0;
+            line-height: 1.8;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .stat-label {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            border: 2px solid #00d4ff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        /* Instructions */
+        .instructions {
+            font-size: 12px;
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.05);
+            border-left: 3px solid #00d4ff;
+            padding: 12px;
+            border-radius: 6px;
+            line-height: 1.6;
+        }
+
+        /* Floating Text Animations */
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-80px) scale(1.2);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .floating-text {
+            position: absolute;
+            animation: floatUp 1s ease-out forwards;
+            font-weight: 700;
+            pointer-events: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.4s ease;
+            max-width: 500px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+        }
+
+        .modal-stats {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .modal-stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            color: #e0e0e0;
+            font-size: 16px;
+        }
+
+        .modal-stat-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-stat-label {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .modal-stat-value {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .modal-description {
+            color: #e0e0e0;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-main {
+                flex-direction: column;
+            }
+
+            .side-panel {
+                width: 100%;
+                max-height: 200px;
+            }
+
+            .scoreboard {
+                gap: 20px;
+            }
+
+            .score-value {
+                font-size: 22px;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes shimmer {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .loading {
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <div class="game-header">
+            <div class="game-title">🏏 THE CRICKET</div>
+            <div class="scoreboard">
+                <div class="score-item">
+                    <div class="score-label">Score</div>
+                    <div class="score-value" id="headerScore">0/0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Over</div>
+                    <div class="score-value" id="headerOver">0.0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="game-main">
+            <!-- Canvas -->
+            <div class="canvas-container">
+                <canvas id="gameCanvas"></canvas>
+            </div>
+
+            <!-- Side Panel -->
+            <div class="side-panel">
+                <!-- Stats -->
+                <div class="panel-section">
+                    <div class="panel-title">📊 Match Stats</div>
+                    <div class="panel-content">
+                        <div class="stat-row">
+                            <span class="stat-label">Runs:</span>
+                            <span class="stat-value" id="panelRuns">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Wickets:</span>
+                            <span class="stat-value" id="panelWickets">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Balls:</span>
+                            <span class="stat-value" id="panelBalls">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Overs:</span>
+                            <span class="stat-value" id="panelOvers">0.0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Strike Rate:</span>
+                            <span class="stat-value" id="panelStrikeRate">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Status -->
+                <div class="panel-section">
+                    <div class="panel-title">🎮 Status</div>
+                    <div class="panel-content" id="gameStatus">Ready to Play</div>
+                </div>
+
+                <!-- Controls -->
+                <div class="button-group">
+                    <button class="btn-primary" id="resetBtn">↻ Reset Game</button>
+                    <button class="btn-secondary" id="infoBtn">ℹ️ Instructions</button>
+                </div>
+
+                <!-- Instructions -->
+                <div class="instructions">
+                    <strong>How to Play:</strong>
+                    <br>🖱️ Click canvas or press <strong>SPACE</strong> to bat
+                    <br>⏱️ Perfect timing = 6 runs
+                    <br>Good timing = 4 runs
+                    <br>Play 7 overs
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="gameModal">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitle">Match Over</div>
+            <div class="modal-description" id="modalDescription">Your innings has ended!</div>
+            <div class="modal-stats">
+                <div class="modal-stat-item">
+                    <span class="modal-stat-label">Final Score:</span>
+                    <span class="modal-stat-value" id="modalScore">0/0</span>
+                </div>
+                <div class="modal-stat-item">
+                    <span class="modal-stat-label">Total Runs:</span>
+                    <span class="modal-stat-value" id="modalRuns">0</span>
+                </div>
+                <div class="modal-stat-item">
+                    <span class="modal-stat-label">Overs Faced:</span>
+                    <span class="modal-stat-value" id="modalOvers">0</span>
+                </div>
+                <div class="modal-stat-item">
+                    <span class="modal-stat-label">Strike Rate:</span>
+                    <span class="modal-stat-value" id="modalStrikeRate">0</span>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-primary" id="playAgainBtn">Play Again</button>
+                <button class="btn-secondary" id="exitBtn">Exit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== GAME CONFIGURATION ====================
+        const CONFIG = {
+            CANVAS_WIDTH: 0,
+            CANVAS_HEIGHT: 0,
+            BALL_SPEED: 8,
+            BALL_SIZE: 8,
+            BAT_LENGTH: 80,
+            BAT_WIDTH: 12,
+            BATSMAN_X: 0,
+            BATSMAN_Y: 0,
+            BALL_START_X: 0,
+            BALL_START_Y: 0,
+            CREASE_Y: 0,
+            PITCH_START_Y: 0,
+            PITCH_END_Y: 0,
+            FIELDERS_COUNT: 7,
+            MAX_OVERS: 7,
+            BALLS_PER_OVER: 6,
+            STADIUM_RADIUS: 0,
+            FIELD_CENTER_X: 0,
+            FIELD_CENTER_Y: 0
+        };
+
+        // ==================== GAME STATE ====================
+        const gameState = {
+            runs: 0,
+            wickets: 0,
+            balls: 0,
+            overs: 0,
+            isGameActive: true,
+            ballInPlay: false,
+            batSwinging: false,
+            gameOver: false,
+            batAngle: 0,
+            lastBallTime: 0
+        };
+
+        // ==================== BALL ====================
+        const ball = {
+            x: 0,
+            y: 0,
+            vx: 0,
+            vy: 0,
+            isFlying: false,
+            trail: []
+        };
+
+        // ==================== BATSMAN ====================
+        const batsman = {
+            x: 0,
+            y: 0,
+            width: 20,
+            height: 40,
+            angle: 0
+        };
+
+        // ==================== FIELDERS ====================
+        const fielders = [];
+
+        // ==================== CANVAS SETUP ====================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function initCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            CONFIG.CANVAS_WIDTH = canvas.width;
+            CONFIG.CANVAS_HEIGHT = canvas.height;
+            CONFIG.FIELD_CENTER_X = canvas.width / 2;
+            CONFIG.FIELD_CENTER_Y = canvas.height / 2;
+            CONFIG.STADIUM_RADIUS = Math.min(canvas.width, canvas.height) * 0.35;
+            
+            CONFIG.BATSMAN_X = CONFIG.FIELD_CENTER_X;
+            CONFIG.BATSMAN_Y = CONFIG.FIELD_CENTER_Y + CONFIG.STADIUM_RADIUS * 0.35;
+            
+            CONFIG.BALL_START_X = CONFIG.FIELD_CENTER_X;
+            CONFIG.BALL_START_Y = CONFIG.FIELD_CENTER_Y - CONFIG.STADIUM_RADIUS * 0.4;
+            
+            CONFIG.CREASE_Y = CONFIG.BATSMAN_Y;
+            CONFIG.PITCH_START_Y = CONFIG.FIELD_CENTER_Y - CONFIG.STADIUM_RADIUS * 0.4;
+            CONFIG.PITCH_END_Y = CONFIG.FIELD_CENTER_Y + CONFIG.STADIUM_RADIUS * 0.4;
+
+            batsman.x = CONFIG.BATSMAN_X;
+            batsman.y = CONFIG.BATSMAN_Y;
+
+            initFielders();
+        }
+
+        // ==================== FIELDERS SYSTEM ====================
+        function initFielders() {
+            fielders.length = 0;
+            const positions = [
+                { angle: Math.PI * 0.2, distance: CONFIG.STADIUM_RADIUS * 0.7 },
+                { angle: Math.PI * 0.35, distance: CONFIG.STADIUM_RADIUS * 0.85 },
+                { angle: Math.PI * 0.65, distance: CONFIG.STADIUM_RADIUS * 0.85 },
+                { angle: Math.PI * 0.8, distance: CONFIG.STADIUM_RADIUS * 0.7 },
+                { angle: Math.PI * 1.2, distance: CONFIG.STADIUM_RADIUS * 0.7 },
+                { angle: Math.PI * 1.65, distance: CONFIG.STADIUM_RADIUS * 0.85 },
+                { angle: Math.PI * 1.85, distance: CONFIG.STADIUM_RADIUS * 0.6 }
+            ];
+
+            positions.forEach((pos, index) => {
+                const fielder = {
+                    id: index,
+                    x: CONFIG.FIELD_CENTER_X + Math.cos(pos.angle) * pos.distance,
+                    y: CONFIG.FIELD_CENTER_Y + Math.sin(pos.angle) * pos.distance,
+                    targetX: 0,
+                    targetY: 0,
+                    speed: 6,
+                    size: 12,
+                    chasing: false,
+                    caught: false
+                };
+                fielders.push(fielder);
+            });
+        }
+
+        // ==================== DRAWING ====================
+        function drawStadium() {
+            // Grass field with gradient
+            const gradient = ctx.createRadialGradient(
+                CONFIG.FIELD_CENTER_X, CONFIG.FIELD_CENTER_Y, 0,
+                CONFIG.FIELD_CENTER_X, CONFIG.FIELD_CENTER_Y, CONFIG.STADIUM_RADIUS
+            );
+            gradient.addColorStop(0, '#2d5a3d');
+            gradient.addColorStop(0.7, '#2a4a3d');
+            gradient.addColorStop(1, '#1a3a2a');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(CONFIG.FIELD_CENTER_X, CONFIG.FIELD_CENTER_Y, CONFIG.STADIUM_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Boundary circle
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(CONFIG.FIELD_CENTER_X, CONFIG.FIELD_CENTER_Y, CONFIG.STADIUM_RADIUS, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Pitch
+            drawPitch();
+
+            // Crease
+            drawCrease();
+        }
+
+        function drawPitch() {
+            ctx.fillStyle = 'rgba(200, 180, 140, 0.7)';
+            ctx.fillRect(
+                CONFIG.FIELD_CENTER_X - 40,
+                CONFIG.PITCH_START_Y,
+                80,
+                CONFIG.PITCH_END_Y - CONFIG.PITCH_START_Y
+            );
+
+            // Pitch lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(CONFIG.FIELD_CENTER_X, CONFIG.PITCH_START_Y);
+            ctx.lineTo(CONFIG.FIELD_CENTER_X, CONFIG.PITCH_END_Y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawCrease() {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 2;
+            
+            // Crease line
+            ctx.beginPath();
+            ctx.moveTo(CONFIG.FIELD_CENTER_X - 50, CONFIG.CREASE_Y);
+            ctx.lineTo(CONFIG.FIELD_CENTER_X + 50, CONFIG.CREASE_Y);
+            ctx.stroke();
+
+            // Popping crease
+            ctx.beginPath();
+            ctx.moveTo(CONFIG.FIELD_CENTER_X - 50, CONFIG.CREASE_Y - 80);
+            ctx.lineTo(CONFIG.FIELD_CENTER_X + 50, CONFIG.CREASE_Y - 80);
+            ctx.stroke();
+        }
+
+        function drawBatsman() {
+            ctx.save();
+            ctx.translate(batsman.x, batsman.y);
+
+            // Body
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(-5, -15, 10, 20);
+
+            // Head
+            ctx.fillStyle = '#d4af8e';
+            ctx.beginPath();
+            ctx.arc(0, -18, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Bat
+            drawBat();
+
+            ctx.restore();
+        }
+
+        function drawBat() {
+            ctx.save();
+            ctx.rotate(gameState.batAngle);
+
+            // Bat handle
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(-3, 10, 6, 25);
+
+            // Bat blade - cricket bat shape
+            const batGradient = ctx.createLinearGradient(0, 35, 0, 95);
+            batGradient.addColorStop(0, '#d2691e');
+            batGradient.addColorStop(0.5, '#8b4513');
+            batGradient.addColorStop(1, '#654321');
+            
+            ctx.fillStyle = batGradient;
+            ctx.beginPath();
+            ctx.moveTo(-8, 35);
+            ctx.quadraticCurveTo(-10, 55, -8, 75);
+            ctx.lineTo(-5, 95);
+            ctx.lineTo(5, 95);
+            ctx.lineTo(8, 75);
+            ctx.quadraticCurveTo(10, 55, 8, 35);
+            ctx.closePath();
+            ctx.fill();
+
+            // Bat edge highlight
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-7, 40);
+            ctx.quadraticCurveTo(-8, 60, -7, 85);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawBall() {
+            if (ball.isFlying) {
+                // Motion trail
+                ctx.globalAlpha = 0.3;
+                for (let i = 0; i < ball.trail.length; i++) {
+                    const alpha = i / ball.trail.length * 0.5;
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.beginPath();
+                    ctx.arc(ball.trail[i].x, ball.trail[i].y, CONFIG.BALL_SIZE * 0.7, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            // Ball
+            const ballGradient = ctx.createRadialGradient(
+                ball.x - 3, ball.y - 3, 0,
+                ball.x, ball.y, CONFIG.BALL_SIZE
+            );
+            ballGradient.addColorStop(0, '#ff8888');
+            ballGradient.addColorStop(0.7, '#ff6b6b');
+            ballGradient.addColorStop(1, '#cc0000');
+            
+            ctx.fillStyle = ballGradient;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, CONFIG.BALL_SIZE, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Seam
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, CONFIG.BALL_SIZE * 0.8, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        function drawFielders() {
+            fielders.forEach(fielder => {
+                if (fielder.caught) {
+                    ctx.fillStyle = 'rgba(100, 200, 100, 0.5)';
+                } else if (fielder.chasing) {
+                    ctx.fillStyle = '#00d4ff';
+                } else {
+                    ctx.fillStyle = '#4a90e2';
+                }
+
+                // Fielder body
+                ctx.fillRect(fielder.x - fielder.size / 2, fielder.y - fielder.size, fielder.size, fielder.size * 2);
+
+                // Fielder head
+                ctx.fillStyle = '#d4af8e';
+                ctx.beginPath();
+                ctx.arc(fielder.x, fielder.y - fielder.size - 5, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Highlight for chasing
+                if (fielder.chasing) {
+                    ctx.strokeStyle = '#00ff88';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(fielder.x, fielder.y - fielder.size / 2, fielder.size * 1.5, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            });
+        }
+
+        function drawCrowd() {
+            // Outer ring highlights for crowd effect
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 12; i++) {
+                const angle = (Math.PI * 2 / 12) * i;
+                const x = CONFIG.FIELD_CENTER_X + Math.cos(angle) * (CONFIG.STADIUM_RADIUS + 10);
+                const y = CONFIG.FIELD_CENTER_Y + Math.sin(angle) * (CONFIG.STADIUM_RADIUS + 10);
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        // ==================== UPDATE ====================
+        function updateBall() {
+            if (!ball.isFlying) return;
+
+            // Add to trail
+            ball.trail.push({ x: ball.x, y: ball.y });
+            if (ball.trail.length > 15) ball.trail.shift();
+
+            // Update position
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+
+            // Gravity
+            ball.vy += 0.3;
+
+            // Check boundary
+            const distFromCenter = Math.hypot(ball.x - CONFIG.FIELD_CENTER_X, ball.y - CONFIG.FIELD_CENTER_Y);
+            if (distFromCenter > CONFIG.STADIUM_RADIUS) {
+                completeBall(6);
+                return;
+            }
+
+            // Check ground
+            if (ball.y > CONFIG.PITCH_END_Y + 50) {
+                const runs = calculateRuns(gameState.batAngle);
+                completeBall(runs);
+                return;
+            }
+
+            // Check fielder catch
+            checkFielderCatch();
+        }
+
+        function updateFielders() {
+            fielders.forEach(fielder => {
+                if (!fielder.chasing || fielder.caught) return;
+
+                const dx = fielder.targetX - fielder.x;
+                const dy = fielder.targetY - fielder.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist > fielder.speed) {
+                    fielder.x += (dx / dist) * fielder.speed;
+                    fielder.y += (dy / dist) * fielder.speed;
+                } else {
+                    fielder.x = fielder.targetX;
+                    fielder.y = fielder.targetY;
+                }
+            });
+        }
+
+        function checkFielderCatch() {
+            fielders.forEach(fielder => {
+                if (fielder.caught) return;
+
+                const dist = Math.hypot(ball.x - fielder.x, ball.y - fielder.y);
+                if (dist < 30) {
+                    fielder.caught = true;
+                    completeBall(0);
+                    createFloatingText('OUT!', ball.x, ball.y, '#ff6b6b');
+                }
+            });
+        }
+
+        function updateGameState() {
+            const totalBalls = gameState.balls + gameState.wickets;
+            gameState.overs = Math.floor(totalBalls / 6);
+            const ballsInOver = totalBalls % 6;
+
+            // Update UI
+            document.getElementById('headerScore').textContent = `${gameState.runs}/${gameState.wickets}`;
+            document.getElementById('headerOver').textContent = `${gameState.overs}.${ballsInOver}`;
+            document.getElementById('panelRuns').textContent = gameState.runs;
+            document.getElementById('panelWickets').textContent = gameState.wickets;
+            document.getElementById('panelBalls').textContent = gameState.balls;
+            document.getElementById('panelOvers').textContent = `${gameState.overs}.${ballsInOver}`;
+
+            const strikeRate = gameState.balls > 0 ? Math.round((gameState.runs / gameState.balls) * 100) : 0;
+            document.getElementById('panelStrikeRate').textContent = strikeRate;
+
+            // Check game over
+            if (gameState.overs >= CONFIG.MAX_OVERS) {
+                endGame();
+            }
+
+            // Check wicket out
+            if (gameState.wickets >= 10) {
+                endGame();
+            }
+        }
+
+        // ==================== BATTING LOGIC ====================
+        function bat() {
+            if (!gameState.isGameActive || gameState.ballInPlay || ball.isFlying) return;
+
+            gameState.ballInPlay = true;
+            gameState.batSwinging = true;
+
+            // Swing animation
+            const swingDuration = 150;
+            const startTime = Date.now();
+            const swingInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / swingDuration;
+
+                if (progress < 1) {
+                    gameState.batAngle = progress * Math.PI * 0.6 - Math.PI * 0.3;
+                } else {
+                    clearInterval(swingInterval);
+                    gameState.batSwinging = false;
+                    gameState.batAngle = 0;
+
+                    // Launch ball
+                    launchBall();
+                }
+            });
+        }
+
+        function launchBall() {
+            ball.x = CONFIG.BALL_START_X;
+            ball.y = CONFIG.BALL_START_Y;
+            ball.isFlying = true;
+            ball.trail = [];
+
+            // Direction with slight variation
+            const variation = (Math.random() - 0.5) * 0.3;
+            const directionX = (Math.random() - 0.5) * 0.2;
+            const distanceToGround = CONFIG.PITCH_END_Y - CONFIG.BALL_START_Y;
+            const speed = CONFIG.BALL_SPEED;
+
+            ball.vx = directionX;
+            ball.vy = speed;
+
+            // Add fielder chasing
+            activateFielderChase();
+        }
+
+        function activateFielderChase() {
+            const randomFielder = Math.floor(Math.random() * fielders.length);
+            fielders.forEach((fielder, index) => {
+                if (index === randomFielder) {
+                    fielder.chasing = true;
+                    fielder.caught = false;
+                    fielder.targetX = CONFIG.FIELD_CENTER_X + (Math.random() - 0.5) * 200;
+                    fielder.targetY = CONFIG.PITCH_END_Y + 100;
+                }
+            });
+        }
+
+        function calculateRuns(batAngle) {
+            const timingBias = Math.sin(batAngle) * 100 + 50;
+            const randomness = Math.random() * 100;
+            const totalTiming = timingBias + randomness;
+
+            if (totalTiming < 30) return 0; // Miss
+            if (totalTiming < 50) return 1;
+            if (totalTiming < 70) return 2;
+            if (totalTiming < 85) return 3;
+            if (totalTiming < 95) return 4;
+            return 6;
+        }
+
+        function completeBall(runs) {
+            ball.isFlying = false;
+            gameState.ballInPlay = false;
+
+            if (runs === 0 && gameState.wickets < 10) {
+                gameState.wickets++;
+                document.getElementById('gameStatus').textContent = 'Wicket! 🔴';
+                createFloatingText('OUT!', ball.x, ball.y, '#ff6b6b');
+            } else {
+                gameState.runs += runs;
+                gameState.balls++;
+                document.getElementById('gameStatus').textContent = `${runs} runs scored`;
+                
+                if (runs > 0) {
+                    let text = runs === 4 ? 'FOUR!' : runs === 6 ? 'SIX!' : `${runs} RUNS`;
+                    const color = runs === 6 ? '#ffed4e' : runs === 4 ? '#00d4ff' : '#00ff88';
+                    createFloatingText(text, ball.x, ball.y, color);
+                }
+            }
+
+            updateGameState();
+            resetFielders();
+        }
+
+        function resetFielders() {
+            fielders.forEach(fielder => {
+                fielder.chasing = false;
+                fielder.caught = false;
+            });
+        }
+
+        function createFloatingText(text, x, y, color) {
+            const floatingText = document.createElement('div');
+            floatingText.textContent = text;
+            floatingText.className = 'floating-text';
+            floatingText.style.left = x + 'px';
+            floatingText.style.top = y + 'px';
+            floatingText.style.color = color;
+            floatingText.style.fontSize = '24px';
+            floatingText.style.fontWeight = 'bold';
+            floatingText.style.textShadow = '0 2px 8px rgba(0, 0, 0, 0.5)';
+            floatingText.style.pointerEvents = 'none';
+            
+            document.body.appendChild(floatingText);
+            setTimeout(() => floatingText.remove(), 1000);
+        }
+
+        // ==================== GAME LIFECYCLE ====================
+        function resetGame() {
+            gameState.runs = 0;
+            gameState.wickets = 0;
+            gameState.balls = 0;
+            gameState.overs = 0;
+            gameState.isGameActive = true;
+            gameState.ballInPlay = false;
+            gameState.gameOver = false;
+            gameState.batAngle = 0;
+
+            ball.x = CONFIG.BALL_START_X;
+            ball.y = CONFIG.BALL_START_Y;
+            ball.isFlying = false;
+            ball.trail = [];
+
+            resetFielders();
+            document.getElementById('gameStatus').textContent = 'Ready to Play';
+            updateGameState();
+            document.getElementById('gameModal').classList.remove('active');
+        }
+
+        function endGame() {
+            gameState.isGameActive = false;
+            gameState.gameOver = true;
+
+            const totalBalls = gameState.balls + gameState.wickets;
+            const overs = Math.floor(totalBalls / 6);
+            const ballsInOver = totalBalls % 6;
+            const strikeRate = gameState.balls > 0 ? Math.round((gameState.runs / gameState.balls) * 100) : 0;
+
+            document.getElementById('modalTitle').textContent = 'Match Over!';
+            document.getElementById('modalDescription').textContent = `Final Score: ${gameState.runs}/${gameState.wickets}`;
+            document.getElementById('modalScore').textContent = `${gameState.runs}/${gameState.wickets}`;
+            document.getElementById('modalRuns').textContent = gameState.runs;
+            document.getElementById('modalOvers').textContent = `${overs}.${ballsInOver}`;
+            document.getElementById('modalStrikeRate').textContent = strikeRate;
+
+            document.getElementById('gameModal').classList.add('active');
+        }
+
+        // ==================== INPUT HANDLING ====================
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                bat();
+            }
+        });
+
+        canvas.addEventListener('click', bat);
+
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+        document.getElementById('playAgainBtn').addEventListener('click', resetGame);
+
+        document.getElementById('exitBtn').addEventListener('click', () => {
+            document.getElementById('gameModal').classList.remove('active');
+        });
+
+        document.getElementById('infoBtn').addEventListener('click', () => {
+            alert('🏏 THE CRICKET\n\nHow to Play:\n\n1. Click the canvas or press SPACE to bat\n2. Time your shot:\n   • Perfect timing = 6 runs\n   • Good timing = 4 runs\n   • Medium timing = 1-3 runs\n   • Bad timing = Wicket\n\n3. Play for 7 overs\n4. Avoid getting caught by fielders\n5. Try to score maximum runs!\n\nGood luck! 🏏');
+        });
+
+        // ==================== ANIMATION LOOP ====================
+        function gameLoop() {
+            // Clear canvas
+            ctx.fillStyle = '#0a0e27';
+            ctx.fillRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+
+            // Draw game elements
+            drawStadium();
+            drawCrowd();
+            drawFielders();
+            drawBatsman();
+            drawBall();
+
+            // Update game state
+            updateBall();
+            updateFielders();
+            updateGameState();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ==================== INITIALIZATION ====================
+        window.addEventListener('resize', initCanvas);
+        
+        function init() {
+            initCanvas();
+            resetGame();
+            gameLoop();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Decision</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            transition: background-color 1.2s ease-out, color 1.2s ease-out;
+            position: relative;
+            text-align: center;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            z-index: 100;
+            transition: color 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .back-link:hover {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .situation {
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            font-weight: 300;
+            line-height: 1.5;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            opacity: 0.95;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .choice {
+            padding: 1.5rem 2.5rem;
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            font-weight: 400;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: inherit;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-radius: 0.75rem;
+            backdrop-filter: blur(20px);
+            pointer-events: auto;
+        }
+
+        .choice:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-4px);
+        }
+
+        .choice.selected {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.8);
+            cursor: default;
+            transform: scale(1.02);
+        }
+
+        .choice.disabled {
+            opacity: 0.3;
+            pointer-events: none;
+            transform: none;
+        }
+
+        .ending {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 300;
+            opacity: 0.9;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1.5rem 1rem;
+            }
+            
+            .choices {
+                gap: 1rem;
+            }
+            
+            .choice {
+                padding: 1.2rem 2rem;
+            }
+        }
+    </style>
+</head>
+<body style="background-color: hsl(210, 25%, 95%); color: hsl(210, 15%, 20%);">
+    <a href="../index.html" class="back-link">← Back</a>
+    
+    <div class="situation" id="situationText">
+        You can move forward, or you can stay where you are.
+    </div>
+    
+    <div class="choices" id="choicesContainer">
+        <div class="choice" data-choice="0">Move forward</div>
+        <div class="choice" data-choice="1">Stay</div>
+    </div>
+    
+    <div class="ending hidden" id="endingText"></div>
+
+    <script>
+        const situations = [
+            {
+                text: "You can move forward, or you can stay where you are.",
+                choices: ["Move forward", "Stay"]
+            },
+            {
+                text: "You receive information that changes nothing immediately.",
+                choices: ["Acknowledge it", "Ignore it"]
+            },
+            {
+                text: "Something unexpected appears.",
+                choices: ["Investigate", "Let it pass"]
+            },
+            {
+                text: "You notice a pattern forming.",
+                choices: ["Follow the pattern", "Break the pattern"]
+            },
+            {
+                text: "Time feels limited.",
+                choices: ["Act now", "Wait"]
+            },
+            {
+                text: "You are given control briefly.",
+                choices: ["Use it", "Leave things as they are"]
+            },
+            {
+                text: "This is the last choice you will make here.",
+                choices: ["Accept", "Decline"]
+            }
+        ];
+
+        const colors = [
+            { bg: 'hsl(210, 25%, 95%)', text: 'hsl(210, 15%, 20%)' },
+            { bg: 'hsl(170, 30%, 92%)', text: 'hsl(170, 20%, 25%)' },
+            { bg: 'hsl(130, 35%, 90%)', text: 'hsl(130, 25%, 28%)' },
+            { bg: 'hsl(50, 40%, 88%)', text: 'hsl(50, 30%, 30%)' },
+            { bg: 'hsl(30, 45%, 92%)', text: 'hsl(30, 35%, 25%)' },
+            { bg: 'hsl(350, 40%, 93%)', text: 'hsl(350, 30%, 22%)' },
+            { bg: 'hsl(280, 35%, 91%)', text: 'hsl(280, 25%, 24%)' },
+            { bg: 'hsl(240, 30%, 92%)', text: 'hsl(240, 20%, 23%)' }
+        ];
+
+        let currentSituation = 0;
+        let currentColorIndex = 0;
+
+        const situationText = document.getElementById('situationText');
+        const choicesContainer = document.getElementById('choicesContainer');
+        const endingText = document.getElementById('endingText');
+        const body = document.body;
+
+        function transitionToColor(index) {
+            const color = colors[index];
+            body.style.backgroundColor = color.bg;
+            body.style.color = color.text;
+            currentColorIndex = index;
+        }
+
+        function showSituation(index) {
+            if (index >= situations.length) {
+                showEnding();
+                return;
+            }
+
+            situationText.textContent = situations[index].text;
+            situationText.classList.remove('hidden');
+            
+            const situation = situations[index];
+            choicesContainer.innerHTML = '';
+            
+            situation.choices.forEach((choiceText, choiceIndex) => {
+                const choice = document.createElement('div');
+                choice.className = 'choice';
+                choice.textContent = choiceText;
+                choice.dataset.choice = choiceIndex;
+                choice.onclick = () => selectChoice(choiceIndex);
+                choicesContainer.appendChild(choice);
+            });
+        }
+
+        function selectChoice(choiceIndex) {
+            // Lock all choices
+            document.querySelectorAll('.choice').forEach(choice => {
+                choice.classList.add('disabled');
+                if (parseInt(choice.dataset.choice) === choiceIndex) {
+                    choice.classList.add('selected');
+                }
+            });
+
+            // Transition to next color
+            const nextColorIndex = currentColorIndex + 1;
+            transitionToColor(nextColorIndex);
+
+            // Move to next situation
+            setTimeout(() => {
+                currentSituation++;
+                showSituation(currentSituation);
+            }, 800);
+        }
+
+        function showEnding() {
+            situationText.classList.add('hidden');
+            choicesContainer.classList.add('hidden');
+            endingText.classList.remove('hidden');
+            endingText.textContent = "The decision has been made.";
+            transitionToColor(colors.length - 1);
+        }
+
+        // Initialize
+        showSituation(0);
+        transitionToColor(0);
+
+        // Prevent text selection
+        document.addEventListener('selectstart', e => e.preventDefault());
+    </script>
+</body>
+</html>

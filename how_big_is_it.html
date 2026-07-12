@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Big Is It?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: hsl(210, 20%, 98%);
+            color: hsl(210, 10%, 20%);
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: background 1.5s ease-out;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        }
+
+        .back-link {
+            font-size: 0.875rem;
+            color: hsl(210, 10%, 40%);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: hsl(210, 10%, 25%);
+        }
+
+        .title {
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-right: auto;
+        }
+
+        .instructions {
+            font-size: 0.875rem;
+            color: hsl(210, 10%, 45%);
+            font-weight: 300;
+        }
+
+        .main-content {
+            height: calc(100vh - 60px);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .ruler {
+            position: fixed;
+            left: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 70vh;
+            width: 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 4px;
+            z-index: 20;
+        }
+
+        .ruler::before {
+            content: '';
+            position: absolute;
+            right: -20px;
+            top: 0;
+            bottom: 0;
+            width: 60px;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .ruler-tick {
+            position: absolute;
+            right: -4px;
+            width: 20px;
+            height: 1px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .ruler-tick.major {
+            width: 32px;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .object-container {
+            position: relative;
+            transition: all 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+
+        .object {
+            position: relative;
+            border-radius: 12px;
+            transition: all 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform, width, height;
+        }
+
+        .label {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: 300;
+            text-align: center;
+            max-width: 80%;
+            opacity: 0;
+            transition: opacity 0.8s ease-out 1s;
+            z-index: 10;
+        }
+
+        .label.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 1rem;
+                height: 50px;
+            }
+            
+            .title {
+                font-size: 1.2rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .ruler {
+                left: 1rem;
+                height: 65vh;
+                width: 6px;
+            }
+            
+            .ruler::before {
+                right: -16px;
+                width: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="../index.html" class="back-link">← Back</a>
+        <div class="title">How Big Is It?</div>
+        <div class="instructions">Use arrow keys to compare scale</div>
+    </div>
+
+    <div class="ruler" id="ruler"></div>
+    
+    <div class="main-content">
+        <div class="object-container" id="objectContainer">
+            <div class="object" id="object"></div>
+        </div>
+    </div>
+    
+    <div class="label" id="label"></div>
+
+    <script>
+        const objects = [
+            { name: "A grain of sand", shape: "circle", scale: 0.012, color: "hsl(210, 45%, 55%)" },
+            { name: "A coin", shape: "circle", scale: 0.075, color: "hsl(35, 65%, 58%)" },
+            { name: "A human eye", shape: "circle", scale: 0.11, color: "hsl(325, 55%, 62%)" },
+            { name: "An average human", shape: "rect", scale: 0.42, color: "hsl(125, 50%, 52%)" },
+            { name: "A vehicle", shape: "rect", scale: 0.62, color: "hsl(5, 55%, 56%)" },
+            { name: "A sports field", shape: "rect", scale: 1.05, color: "hsl(285, 60%, 60%)" },
+            { name: "A large building", shape: "rect", scale: 1.85, color: "hsl(65, 65%, 58%)" },
+            { name: "A mountain", shape: "circle", scale: 3.2, color: "hsl(205, 55%, 54%)" },
+            { name: "A planet", shape: "circle", scale: 7.8, color: "hsl(225, 65%, 62%)" },
+            { name: "A star", shape: "circle", scale: 18.5, color: "hsl(45, 85%, 68%)" },
+            { name: "A planetary system", shape: "circle", scale: 52.0, color: "hsl(265, 75%, 65%)" }
+        ];
+
+        let currentIndex = 0;
+        const object = document.getElementById('object');
+        const label = document.getElementById('label');
+        const container = document.getElementById('objectContainer');
+        const body = document.body;
+        const ruler = document.getElementById('ruler');
+
+        function createRuler() {
+            for (let i = 0; i <= 20; i++) {
+                const tick = document.createElement('div');
+                tick.className = `ruler-tick ${i % 5 === 0 ? 'major' : ''}`;
+                tick.style.top = `${(100 / 20) * i}%`;
+                ruler.appendChild(tick);
+            }
+        }
+
+        function showObject(index) {
+            const obj = objects[index];
+            label.textContent = obj.name;
+            
+            // Calculate dimensions relative to viewport
+            const vw = Math.min(100, obj.scale * 120);
+            const vh = obj.shape === 'circle' ? vw : Math.min(70, obj.scale * 80);
+            
+            object.style.width = `${vw}vw`;
+            object.style.height = `${vh}vh`;
+            object.style.backgroundColor = obj.color;
+            object.style.borderRadius = obj.shape === 'circle' ? '50%' : '12px';
+            
+            // Center large objects
+            const scaleFactor = Math.max(1, Math.max(vw/100, vh/100));
+            container.style.transform = `translateX(-50%) scale(${1/scaleFactor * 0.95})`;
+            
+            // Background tint
+            const hue = parseInt(obj.color.match(/hsl\$([^,]+)/)[1]);
+            body.style.background = `hsl(${hue}, 12%, ${96 - index * 0.6}%)`;
+            
+            // Show label
+            setTimeout(() => label.classList.add('show'), 600);
+        }
+
+        function nextObject() {
+            if (currentIndex < objects.length - 1) {
+                label.classList.remove('show');
+                currentIndex++;
+                setTimeout(() => showObject(currentIndex), 400);
+            }
+        }
+
+        function prevObject() {
+            if (currentIndex > 0) {
+                label.classList.remove('show');
+                currentIndex--;
+                setTimeout(() => showObject(currentIndex), 400);
+            }
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.code) {
+                case 'ArrowRight':
+                case 'Space':
+                    e.preventDefault();
+                    nextObject();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    prevObject();
+                    break;
+            }
+        });
+
+        // Mouse controls
+        document.addEventListener('click', (e) => {
+            const rect = document.body.getBoundingClientRect();
+            if (e.clientX > rect.width / 2) {
+                nextObject();
+            } else {
+                prevObject();
+            }
+        });
+
+        // Prevent context menu
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Initialize
+        createRuler();
+        showObject(0);
+    </script>
+</body>
+</html>

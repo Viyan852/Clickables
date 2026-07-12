@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Rare Are You</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            transition: background-color 1.5s ease-out;
+            position: relative;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            font-size: 0.875rem;
+            color: rgba(0,0,0,0.4);
+            text-decoration: none;
+            z-index: 100;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: rgba(0,0,0,0.7);
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 4rem;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        .rarity-display {
+            font-size: 4rem;
+            font-weight: 200;
+            text-align: center;
+            margin-bottom: 2rem;
+            min-height: 5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 1.5s ease-out;
+        }
+
+        .question {
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            opacity: 0.9;
+            line-height: 1.4;
+            max-width: 600px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .option {
+            padding: 1.5rem 2rem;
+            font-size: 1.2rem;
+            border: 2px solid rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .option:hover {
+            background: rgba(255,255,255,0.9);
+            border-color: rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            background: rgba(0,0,0,0.05);
+            border-color: rgba(0,0,0,0.3);
+        }
+
+        .result-text {
+            font-size: 1.1rem;
+            opacity: 0.7;
+            text-align: center;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+            
+            .rarity-display {
+                font-size: 3rem;
+            }
+            
+            .question {
+                font-size: 1.3rem;
+                margin-bottom: 2rem;
+            }
+            
+            body {
+                padding: 1rem;
+            }
+        }
+
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back</a>
+    
+    <div class="title">How Rare Are You</div>
+    
+    <div class="rarity-display" id="rarityDisplay">1 in 2</div>
+    
+    <div class="question" id="questionText">When were you born?</div>
+    
+    <div class="options" id="optionsContainer">
+        <!-- Options populated by JS -->
+    </div>
+    
+    <div class="result-text" id="resultText" style="display: none;"></div>
+
+    <script>
+        const questions = [
+            {
+                text: "When were you born?",
+                options: ["Early year", "Middle of the year", "Later part of the year"],
+                weights: [0.35, 0.45, 0.20]
+            },
+            {
+                text: "Compared to others your age, your height is:",
+                options: ["Shorter than most", "About the same", "Taller than most"],
+                weights: [0.30, 0.50, 0.20]
+            },
+            {
+                text: "Your hand usage is:",
+                options: ["One dominant hand", "Opposite hand", "Both interchangeably"],
+                weights: [0.90, 0.09, 0.01]
+            },
+            {
+                text: "When are you most alert?",
+                options: ["Soon after waking", "Mid-day", "Late at night"],
+                weights: [0.35, 0.45, 0.20]
+            },
+            {
+                text: "You prefer colors in the",
+                options: ["Warm tones", "Cool tones", "Neutral tones"],
+                weights: [0.40, 0.35, 0.25]
+            },
+            {
+                text: "When making decisions, you tend to:",
+                options: ["Act quickly and adjust", "Observe quietly first", "Break the problem into parts"],
+                weights: [0.35, 0.30, 0.35]
+            },
+            {
+                text: "You prefer environments that are:",
+                options: ["Predictable", "Dynamic", "A mix of both"],
+                weights: [0.30, 0.25, 0.45]
+            },
+            {
+                text: "Thinking about large scales:",
+                options: ["Feels abstract", "Feels manageable", "Feels difficult to visualize"],
+                weights: [0.40, 0.35, 0.25]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let totalProbability = 0.5; // Start at 1 in 2
+        let animationId = null;
+
+        function formatRarity(prob) {
+            const denominator = Math.round(1 / prob);
+            if (denominator < 1000) return `1 in ${denominator}`;
+            if (denominator < 1000000) {
+                const thousands = (denominator / 1000).toFixed(0);
+                return `1 in ${thousands}K`;
+            }
+            const millions = (denominator / 1000000).toFixed(1);
+            return `1 in ${millions}M`;
+        }
+
+        function getColor(prob) {
+            const hue = 25 + (1 - prob) * 210; // 25 (warm) to 235 (cool blue)
+            const saturation = 15 + (1 - prob) * 25;
+            const lightness = 95 - (1 - prob) * 20;
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+
+        function updateDisplay(targetProb) {
+            if (animationId) cancelAnimationFrame(animationId);
+            
+            let startProb = totalProbability;
+            let startTime = null;
+
+            function animate(currentTime) {
+                if (!startTime) startTime = currentTime;
+                const elapsed = currentTime - startTime;
+                const duration = 1500;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Smooth easing
+                const easedProgress = 1 - Math.pow(1 - progress, 3);
+                totalProbability = startProb + (targetProb - startProb) * easedProgress;
+                
+                const rarityText = formatRarity(totalProbability);
+                const color = getColor(totalProbability);
+                
+                document.getElementById('rarityDisplay').textContent = rarityText;
+                document.body.style.backgroundColor = color;
+                
+                if (progress < 1) {
+                    animationId = requestAnimationFrame(animate);
+                }
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function showQuestion(index) {
+            if (index >= questions.length) {
+                showResult();
+                return;
+            }
+
+            const question = questions[index];
+            document.getElementById('questionText').textContent = question.text;
+            
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            question.options.forEach((option, i) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = option;
+                div.onclick = () => selectOption(i);
+                container.appendChild(div);
+            });
+        }
+
+        function selectOption(optionIndex) {
+            const question = questions[currentQuestion];
+            const weight = question.weights[optionIndex];
+            totalProbability *= weight;
+            
+            // Fade out options
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                if (i === optionIndex) {
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.add('fade-out');
+                }
+            });
+            
+            setTimeout(() => {
+                currentQuestion++;
+                updateDisplay(totalProbability);
+                showQuestion(currentQuestion);
+            }, 300);
+        }
+
+        function showResult() {
+            document.getElementById('questionText').style.display = 'none';
+            document.getElementById('optionsContainer').style.display = 'none';
+            document.getElementById('resultText').style.display = 'block';
+            document.getElementById('resultText').textContent = "Out of many possible combinations, this is one.";
+        }
+
+        // Initialize
+        showQuestion(0);
+        updateDisplay(0.5);
+    </script>
+</body>
+</html>

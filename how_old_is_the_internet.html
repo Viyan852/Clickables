@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Old Is the Internet?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: #333;
+            user-select: none;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            font-size: 14px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            letter-spacing: -0.02em;
+        }
+
+        .back-link {
+            color: #7f8c8d;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 16px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .back-link:hover {
+            background: #ecf0f1;
+            border-color: #95a5a6;
+            color: #2c3e50;
+        }
+
+        .hint {
+            color: #95a5a6;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .main-container {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .timeline-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 4px;
+            width: 8000px;
+            background: linear-gradient(90deg, 
+                #bdc3c7 0%, 
+                #95a5a6 20%, 
+                #7f8c8d 40%, 
+                #34495e 60%, 
+                #2c3e50 80%, 
+                #1a252f 100%);
+        }
+
+        .timeline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            transform: translateX(0);
+            transition: transform 0.1s ease-out;
+        }
+
+        .milestone {
+            position: absolute;
+            top: -20px;
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            border: 2px solid;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+        }
+
+        .milestone.glow {
+            box-shadow: 0 0 20px rgba(52, 73, 94, 0.6);
+            transform: translateX(-50%) scale(1.3);
+        }
+
+        .era-segment {
+            position: absolute;
+            top: -100px;
+            height: 200px;
+            border-radius: 50px;
+            opacity: 0.1;
+            transform: translateX(-50%);
+        }
+
+        .fact {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 500px;
+            padding: 24px 32px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            line-height: 1.6;
+            color: #2c3e50;
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 500;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .fact.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .crosshair {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 200;
+            opacity: 0.3;
+        }
+
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: #7f8c8d;
+        }
+
+        .crosshair::before {
+            width: 2px;
+            height: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .crosshair::after {
+            width: 100%;
+            height: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 16px;
+                flex-direction: column;
+                height: 80px;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .fact {
+                font-size: 16px;
+                padding: 20px 24px;
+                top: 90px;
+                max-width: 90vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="../index.html" class="back-link">← Back</a>
+        <h1>How Old Is the Internet?</h1>
+        <div class="hint">Use ← → to move through time</div>
+    </div>
+
+    <div class="main-container">
+        <div class="crosshair"></div>
+        
+        <div class="timeline-container">
+            <div class="timeline" id="timeline"></div>
+        </div>
+
+        <div class="fact" id="fact"></div>
+    </div>
+
+    <script>
+        class InternetTimeline {
+            constructor() {
+                this.timeline = document.getElementById('timeline');
+                this.factEl = document.getElementById('fact');
+                this.currentFact = null;
+                
+                this.milestones = [
+                    { pos: 200, text: 'Early computer networks connect research institutions', color: '#95a5a6' },
+                    { pos: 800, text: 'First email message sent between computers', color: '#7f8c8d' },
+                    { pos: 1400, text: 'Packet switching enables reliable data transmission', color: '#5d6d7e' },
+                    { pos: 2200, text: 'ARPANET links universities across the country', color: '#34495e' },
+                    { pos: 3000, text: 'World Wide Web proposed as information system', color: '#2c3e50' },
+                    { pos: 3800, text: 'First websites appear on university servers', color: '#3498db' },
+                    { pos: 4600, text: 'Commercial internet service providers emerge', color: '#2980b9' },
+                    { pos: 5400, text: 'Search engines organize the growing web', color: '#1f618d' },
+                    { pos: 6200, text: 'Social networks connect individuals worldwide', color: '#2874a6' },
+                    { pos: 7000, text: 'Broadband replaces dial-up connections', color: '#21618c' },
+                    { pos: 7600, text: 'Smartphones bring internet to every hand', color: '#1b4f72' },
+                    { pos: 7800, text: 'Streaming video reshapes media consumption', color: '#154360' },
+                    { pos: 7900, text: 'Cloud computing powers global services', color: '#0e2f4d' }
+                ];
+
+                this.position = 0;
+                this.velocity = 0;
+                this.keys = {};
+                this.scrollListener = null;
+
+                this.init();
+            }
+
+            init() {
+                this.createMilestones();
+                this.createEraSegments();
+                this.bindEvents();
+                this.animate();
+                this.updateFact();
+            }
+
+            createMilestones() {
+                this.milestones.forEach((milestone, index) => {
+                    const el = document.createElement('div');
+                    el.className = 'milestone';
+                    el.style.left = milestone.pos + 'px';
+                    el.style.borderColor = milestone.color;
+                    el.dataset.index = index;
+                    this.timeline.appendChild(el);
+                });
+            }
+
+            createEraSegments() {
+                const eras = [
+                    { pos: 500, width: 1000, color: '#e8f4f8' },
+                    { pos: 1500, width: 1200, color: '#d5e8f0' },
+                    { pos: 3000, width: 1500, color: '#c2e0e8' },
+                    { pos: 5000, width: 1800, color: '#b0d8e0' },
+                    { pos: 7000, width: 1000, color: '#9ecfd8' }
+                ];
+
+                eras.forEach(era => {
+                    const el = document.createElement('div');
+                    el.className = 'era-segment';
+                    el.style.left = era.pos + 'px';
+                    el.style.width = era.width + 'px';
+                    el.style.background = era.color;
+                    this.timeline.appendChild(el);
+                });
+            }
+
+            bindEvents() {
+                // Keyboard
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key] = true;
+                    e.preventDefault();
+                });
+
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key] = false;
+                    e.preventDefault();
+                });
+
+                // Mouse wheel
+                window.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    this.velocity += e.deltaY > 0 ? 2 : -2;
+                }, { passive: false });
+
+                // Prevent context menu
+                document.addEventListener('contextmenu', e => e.preventDefault());
+            }
+
+            update() {
+                // Keyboard input
+                if (this.keys['ArrowLeft']) {
+                    this.velocity = Math.max(this.velocity - 0.5, -8);
+                } else if (this.keys['ArrowRight']) {
+                    this.velocity = Math.min(this.velocity + 0.5, 8);
+                } else {
+                    this.velocity *= 0.92; // Friction
+                }
+
+                // Update position
+                this.position += this.velocity;
+                this.position = Math.max(-200, Math.min(6800, this.position));
+
+                // Update timeline transform
+                this.timeline.style.transform = `translateX(${-this.position}px)`;
+
+                // Check milestones
+                this.checkMilestones();
+                this.updateFact();
+            }
+
+            checkMilestones() {
+                const centerX = this.position + window.innerWidth / 2 - 50;
+                
+                this.milestones.forEach((milestone, index) => {
+                    const el = this.timeline.children[index];
+                    const distance = Math.abs(centerX - milestone.pos);
+                    
+                    if (distance < 100) {
+                        el.classList.add('glow');
+                    } else {
+                        el.classList.remove('glow');
+                    }
+                });
+            }
+
+            updateFact() {
+                const centerX = this.position + window.innerWidth / 2 - 50;
+                let closestMilestone = null;
+                let minDistance = Infinity;
+
+                this.milestones.forEach((milestone, index) => {
+                    const distance = Math.abs(centerX - milestone.pos);
+                    if (distance < minDistance && distance < 300) {
+                        minDistance = distance;
+                        closestMilestone = milestone;
+                    }
+                });
+
+                if (closestMilestone && closestMilestone !== this.currentFact) {
+                    this.showFact(closestMilestone.text);
+                    this.currentFact = closestMilestone;
+                } else if (!closestMilestone && this.currentFact) {
+                    this.hideFact();
+                    this.currentFact = null;
+                }
+            }
+
+            showFact(text) {
+                this.factEl.textContent = text;
+                this.factEl.classList.add('show');
+            }
+
+            hideFact() {
+                this.factEl.classList.remove('show');
+            }
+
+            animate() {
+                this.update();
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new InternetTimeline();
+        });
+    </script>
+</body>
+</html>

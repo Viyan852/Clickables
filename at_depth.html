@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>At Depth</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #000;
+      position: relative;
+    }
+
+    .earth {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 22000px;
+      background:
+        /* Surface vegetation and atmosphere */
+        linear-gradient(to bottom,
+          transparent 0%,
+          transparent 9%,
+          rgba(56,189,248,0.55) 12%,
+          rgba(56,189,248,0.55) 15%,
+          transparent 18%
+        ),
+        /* Pipes and infrastructure */
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 260px,
+          #475569 260px,
+          #475569 266px,
+          transparent 266px,
+          transparent 520px
+        ),
+        repeating-linear-gradient(
+          to right,
+          transparent 0px,
+          transparent 380px,
+          rgba(124, 58, 237, 0.22) 380px,
+          rgba(124, 58, 237, 0.22) 460px,
+          transparent 460px,
+          transparent 820px
+        ),
+        /* Mining tunnels */
+        repeating-linear-gradient(
+          45deg,
+          transparent 0px,
+          transparent 180px,
+          rgba(120,119,198,0.15) 180px,
+          rgba(120,119,198,0.15) 190px,
+          transparent 190px,
+          transparent 360px
+        ),
+        /* Groundwater aquifers */
+        linear-gradient(to bottom,
+          transparent 0%,
+          transparent 22%,
+          rgba(14,165,233,0.3) 24%,
+          rgba(14,165,233,0.3) 26%,
+          transparent 28%,
+          transparent 30%,
+          rgba(59,130,246,0.25) 32%,
+          rgba(59,130,246,0.25) 34%,
+          transparent 36%
+        ),
+        /* Main geological layers */
+        linear-gradient(
+          to bottom,
+          #dbeafe 0%,
+          #ffffff 4%,
+          #fde68a 6%,
+          #d6b87c 12%,
+          #b08968 20%,
+          #8b5a2b 32%,
+          #6f4518 42%,
+          #7c2d12 56%,
+          #4c1d95 72%,
+          #7f1d1d 87%,
+          #3b0707 100%
+        );
+    }
+
+    .elevator {
+      position: fixed;
+      left: 46px;
+      top: 160px;
+      width: 70px;
+      height: 110px;
+      background: #e5e7eb;
+      border: 3px solid #475569;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .elevator::before {
+      content: "";
+      position: absolute;
+      top: 6px;
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: #475569;
+    }
+
+    .window {
+      width: 36px;
+      height: 44px;
+      background: #f8fafc;
+      border: 2px solid #475569;
+      border-radius: 8px;
+    }
+
+    .cable {
+      position: fixed;
+      left: 80px;
+      top: 0;
+      width: 2px;
+      height: 100vh;
+      background: #64748b;
+    }
+
+    .depth-display {
+      position: fixed;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #f8fafc;
+      font-size: 24px;
+      font-weight: 600;
+      text-align: center;
+      z-index: 100;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .fact-panel {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 320px;
+      max-width: 90vw;
+      background: rgba(31,41,55,0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(75,85,99,0.6);
+      border-radius: 12px;
+      padding: 24px;
+      color: #f8fafc;
+      font-size: 14px;
+      line-height: 1.5;
+      z-index: 100;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    .fact-panel::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 8px;
+      height: 8px;
+      background: #60a5fa;
+      border-radius: 50%;
+    }
+
+    .fact-panel .marker {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #60a5fa;
+      border-radius: 50%;
+      margin: 0 8px;
+      vertical-align: middle;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: #94a3b8;
+      font-size: 14px;
+      text-decoration: none;
+      font-weight: 500;
+      z-index: 100;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #f8fafc;
+    }
+
+    @media (max-width: 480px) {
+      .fact-panel {
+        width: calc(100vw - 40px);
+        padding: 20px;
+        font-size: 13px;
+      }
+      
+      .depth-display {
+        font-size: 20px;
+        top: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="earth" id="earth"></div>
+  <div class="cable"></div>
+  <div class="elevator">
+    <div class="window"></div>
+  </div>
+  
+  <a href="../index.html" class="back-link">← Back</a>
+  
+  <div class="depth-display" id="depthDisplay">0 m</div>
+  <div class="fact-panel" id="factPanel">
+    <div>Surface elevation. The journey begins.</div>
+  </div>
+
+  <script>
+    const MAX_DEPTH = 6371000;
+    let currentDepth = 0;
+    let targetDepth = 0;
+    let scrollTimeout = null;
+
+    const earth = document.getElementById('earth');
+    const depthDisplay = document.getElementById('depthDisplay');
+    const factPanel = document.getElementById('factPanel');
+
+    const facts = [
+      { depth: 0, text: 'Surface elevation. The journey begins.' },
+      { depth: 50, text: '<span class="marker"></span>Urban infrastructure. Pipes carry water through concrete foundations.' },
+      { depth: 200, text: '<span class="marker"></span>Groundwater table. First aquifers begin to appear.' },
+      { depth: 500, text: '<span class="marker"></span>Shallow mining. Coal seams and early tunnels.' },
+      { depth: 1000, text: 'Topsoil gives way to sedimentary rock layers.' },
+      { depth: 3000, text: '<span class="marker"></span>Major aquifers. Significant groundwater reserves.' },
+      { depth: 12000, text: 'Deepest human mining: 4 km. Rock pressure exceeds 1000 atmospheres.' },
+      { depth: 35000, text: 'Mohorovičić discontinuity. Boundary between crust and mantle.' },
+      { depth: 100000, text: 'Oceanic crust ends. Continental crust averages 35 km thick.' },
+      { depth: 500000, text: 'Upper mantle. Peridotite dominates, rich in olivine.' },
+      { depth: 1000000, text: 'Lithosphere-asthenosphere boundary. Rocks begin to flow.' },
+      { depth: 2000000, text: 'Lower mantle. Extreme pressure alters mineral structures.' },
+      { depth: 2800000, text: 'D" layer. Complex chemistry near core-mantle boundary.' },
+      { depth: 2890000, text: '<span class="marker"></span>Core-mantle boundary. Largest density contrast in Earth.' },
+      { depth: 3000000, text: 'Outer core. Liquid iron-nickel alloy generates magnetic field.' },
+      { depth: 5000000, text: 'Outer core deepens. Convection drives Earth\'s dynamo.' },
+      { depth: 5150000, text: '<span class="marker"></span>Inner core boundary. Solidification begins.' },
+      { depth: 6371000, text: 'Center of the Earth. Solid iron-nickel, 6000°C, immense pressure.' }
+    ];
+
+    function updateDepthDisplay() {
+      const formattedDepth = currentDepth < 1000 
+        ? `${Math.round(currentDepth)} m`
+        : currentDepth < 1000000 
+        ? `${(currentDepth / 1000).toFixed(0)} km`
+        : `${(currentDepth / 1000000).toFixed(1)}M km`;
+      depthDisplay.textContent = formattedDepth;
+    }
+
+    function updateFact() {
+      let activeFact = facts[0];
+      for (const fact of facts) {
+        if (currentDepth >= fact.depth) {
+          activeFact = fact;
+        } else {
+          break;
+        }
+      }
+      factPanel.innerHTML = activeFact.text;
+    }
+
+    function updateEarthPosition() {
+      const progress = Math.min(currentDepth / MAX_DEPTH, 1);
+      earth.style.transform = `translateY(${-progress * 16000}px)`;
+    }
+
+    function snapToTarget() {
+      currentDepth = Math.round(targetDepth / 100) * 100; // Snap to nearest 100m
+      currentDepth = Math.max(0, Math.min(MAX_DEPTH, currentDepth));
+      
+      updateDepthDisplay();
+      updateFact();
+      updateEarthPosition();
+    }
+
+    function handleScroll(e) {
+      e.preventDefault();
+      
+      const delta = e.deltaY || e.detail || 0;
+      targetDepth += delta * 80; // Reduced sensitivity to prevent jitter
+      
+      targetDepth = Math.max(0, Math.min(MAX_DEPTH, targetDepth));
+      
+      // Clear previous timeout and set new one
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      
+      scrollTimeout = setTimeout(() => {
+        snapToTarget();
+      }, 100); // Snap after 100ms of no scrolling
+      
+      // Immediate visual update
+      updateDepthDisplay();
+      updateFact();
+      updateEarthPosition();
+    }
+
+    function handleKeydown(e) {
+      e.preventDefault();
+      
+      switch(e.key) {
+        case 'ArrowDown':
+        case 'PageDown':
+          targetDepth += 500000; // 500km jumps
+          break;
+        case 'ArrowUp':
+        case 'PageUp':
+          targetDepth -= 500000;
+          break;
+      }
+      
+      targetDepth = Math.max(0, Math.min(MAX_DEPTH, targetDepth));
+      
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      
+      scrollTimeout = setTimeout(() => {
+        snapToTarget();
+      }, 100);
+      
+      updateDepthDisplay();
+      updateFact();
+      updateEarthPosition();
+    }
+
+    // Event listeners
+    window.addEventListener('wheel', handleScroll, { passive: false });
+    document.addEventListener('keydown', handleKeydown);
+
+    // Touch support for mobile
+    let touchStartY = 0;
+    let isTouchScrolling = false;
+    
+    window.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+      isTouchScrolling = true;
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      if (isTouchScrolling) {
+        snapToTarget();
+        isTouchScrolling = false;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchStartY - touchY;
+      
+      targetDepth += deltaY * 100;
+      targetDepth = Math.max(0, Math.min(MAX_DEPTH, targetDepth));
+      
+      touchStartY = touchY;
+      
+      updateDepthDisplay();
+      updateFact();
+      updateEarthPosition();
+    }, { passive: false });
+
+    // Initial setup
+    updateDepthDisplay();
+    updateFact();
+    updateEarthPosition();
+  </script>
+</body>
+</html>
